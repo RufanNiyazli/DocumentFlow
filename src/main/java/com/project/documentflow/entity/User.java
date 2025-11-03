@@ -3,6 +3,7 @@ package com.project.documentflow.entity;
 import com.project.documentflow.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +27,9 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> refreshTokens;
 
     @Override
     public String getUsername() {
