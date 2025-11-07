@@ -2,6 +2,7 @@ package com.project.documentflow.service.impl;
 
 import com.project.documentflow.dto.AuthResponse;
 import com.project.documentflow.dto.LoginRequest;
+import com.project.documentflow.dto.RefreshTokenRequest;
 import com.project.documentflow.dto.RegisterRequest;
 import com.project.documentflow.entity.RefreshToken;
 import com.project.documentflow.entity.User;
@@ -16,6 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +49,29 @@ public class AuthService implements IAuthService {
 
 
         return "You successfully registered!";
+    }
+
+    @Override
+    public AuthResponse refresh(RefreshTokenRequest request) {
+        String token = request.getRefreshToken();
+
+        boolean isValid = refreshTokenService.validateToken(token);
+        if (!isValid) {
+            throw new RuntimeException("Invalid or expired refresh token!");
+        }
+
+        Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);
+        if (refreshTokenOpt.isEmpty()) {
+            throw new RuntimeException("Refresh token not found in DB!");
+        }
+
+        User user = refreshTokenOpt.get().getUser();
+
+        String newAccessToken = jwtService.generateToken(user);
+
+
+        return new AuthResponse(newAccessToken, token);
+
     }
 
     @Override

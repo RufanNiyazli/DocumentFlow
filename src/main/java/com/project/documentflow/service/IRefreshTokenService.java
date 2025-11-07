@@ -6,5 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IRefreshTokenService{
     public RefreshToken createRefreshToken(User user);
+    public boolean validateToken(String token);
+
 
 }

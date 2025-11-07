@@ -14,6 +14,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefreshTokenService implements IRefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenCacheService tokenCacheService;
+    private static final long REFRESH_TOKEN_TTL_SECONDS = 2 * 60 * 60; // 2 saat
 
     @Override
     public RefreshToken createRefreshToken(User user) {
@@ -24,7 +26,27 @@ public class RefreshTokenService implements IRefreshTokenService {
         refreshToken.setUser(user);
         refreshTokenRepository.save(refreshToken);
 
+        tokenCacheService.saveToken(
+                "refresh_token:" + refreshToken.getToken(),
+                user.getId(),
+                REFRESH_TOKEN_TTL_SECONDS
+        );
+
 
         return refreshToken;
     }
+
+    @Override
+    public boolean validateToken(String token) {
+        Object userId = tokenCacheService.getToken("refresh_token:" + token);
+        if (userId != null) return true;
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token).orElseThrow(() -> new RuntimeException("Token not found!"));
+        if (refreshToken.getExpiredAt().isBefore(LocalDateTime.now())) return false;
+        tokenCacheService.saveToken("refresh_token:" + token, refreshToken.getUser().getId(), REFRESH_TOKEN_TTL_SECONDS);
+
+
+        return true;
+    }
+    // Eger Redis tokeni taparsa — cox suretli netice verecek.
+    // Eger tapmazsa — DB-dan yoxlayacaq və etibarlıdırsa, Redis-ə yenidən add edəcek.
 }
