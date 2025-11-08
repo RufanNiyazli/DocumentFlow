@@ -29,5 +29,8 @@ public class Document {
     private Instant createdAt;
 
     private Instant updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "submitter_id")
+    private User submitter;
 
 }
