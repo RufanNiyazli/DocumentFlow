@@ -215,7 +215,7 @@ App runs at:
 * GitHub: [https://github.com/yourusername/documentflow](https://github.com/yourusername/documentflow)
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE.text).
 
 ---
 
