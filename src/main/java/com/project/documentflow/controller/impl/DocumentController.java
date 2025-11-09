@@ -20,7 +20,7 @@ import java.util.Map;
 public class DocumentController implements IDocumentController {
 
     private final IDocumentService documentService;
-    private final UserRepository userRepository;  // ← BUNU ƏLAVƏ ET
+    private final UserRepository userRepository;
 
     @PostMapping("/public/submit")
     @Override
@@ -30,7 +30,7 @@ public class DocumentController implements IDocumentController {
             @RequestParam("submitter") String submitter
     ) {
         try {
-            // ✅ User-i database-dən tap
+
             User user = userRepository.findByUsername(submitter)
                     .orElseThrow(() -> new RuntimeException("User not found: " + submitter));
 
@@ -38,11 +38,10 @@ public class DocumentController implements IDocumentController {
             Document doc = new Document();
             doc.setTitle(title);
             doc.setFilename(file.getOriginalFilename());
-            doc.setSubmitter(user);  // ← Database-dən gələn user
+            doc.setSubmitter(user);
             doc.setCreatedAt(Instant.now());
             doc.setUpdatedAt(Instant.now());
 
-            // Submit et
             Document saved = documentService.submitDocument(doc);
 
             return ResponseEntity.ok(Map.of(
